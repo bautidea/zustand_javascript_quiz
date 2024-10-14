@@ -6,11 +6,14 @@ interface State {
   currentQuestion: number;
   fetchQuestion: (limit: number) => Promise<void>;
   selectAnswer: (questionInd: number, answerInd: number) => void;
+  goNextQuestion: () => void;
+  goPreviousQuestion: () => void;
 }
 
 export const useQuestionStore = create<State>((set, get) => ({
   questions: [],
   currentQuestion: 0,
+
   fetchQuestion: async (limit) => {
     // Fetching from public data.
     const response = await fetch('http://localhost:5173/data.json');
@@ -59,5 +62,22 @@ export const useQuestionStore = create<State>((set, get) => ({
     };
 
     set({ questions: newQuestions });
+  },
+
+  goNextQuestion: () => {
+    const { currentQuestion, questions } = get();
+    const nextQuestion = currentQuestion + 1;
+
+    if (nextQuestion <= questions.length) {
+      set({ currentQuestion: nextQuestion });
+    }
+  },
+
+  goPreviousQuestion: () => {
+    const { currentQuestion } = get();
+    const previousQuestion = currentQuestion - 1;
+    if (previousQuestion >= 0) {
+      set({ currentQuestion: previousQuestion });
+    }
   },
 }));

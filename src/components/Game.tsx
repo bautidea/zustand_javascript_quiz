@@ -9,6 +9,7 @@ import { useQuestionStore } from '../store/question';
 import { type Question } from '../types';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { gradientDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import confetti from 'canvas-confetti';
 
 interface Props {
   info: Question;
@@ -40,9 +41,15 @@ function ShowQuestion({ info }: Props) {
     // If user has selected an answer, but its incorrect.
     if (!isCorrectUserAnswer && index === userSelectedAnswer) return 'red';
 
-    // The index that correspond to correct answer always should color green.
     // If user select this index as correct answer then it will be colored green.
+    if (isCorrectUserAnswer && index === correctAnswer) {
+      confetti();
+      return 'green';
+    }
+
+    // The index that correspond to correct answer always should color green.
     if (index === correctAnswer) return 'green';
+
     return 'transparent';
   }
 
@@ -59,7 +66,7 @@ function ShowQuestion({ info }: Props) {
           <ListItemButton
             key={index}
             divider={info.answers.length !== index + 1}
-            disabled={info?.userSelectedAnswer != null}
+            disabled={info.userSelectedAnswer != null}
             onClick={handleAnswerClick(index)}
             sx={{
               backgroundColor: answerBackgroundColor(index),
