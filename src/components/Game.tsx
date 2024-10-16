@@ -12,7 +12,6 @@ import { useQuestionStore } from '../store/question';
 import { type Question } from '../types';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { gradientDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
-import confetti from 'canvas-confetti';
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import { Footer } from './Footer';
 
@@ -35,10 +34,7 @@ function answerBackgroundColor(info: Question, index: number) {
   if (!isCorrectUserAnswer && index === userSelectedAnswer) return 'red';
 
   // If user select this index as correct answer then it will be colored green.
-  if (isCorrectUserAnswer && index === correctAnswer) {
-    confetti();
-    return 'green';
-  }
+  if (isCorrectUserAnswer && index === correctAnswer) return 'green';
 
   // The index that correspond to correct answer always should color green.
   if (index === correctAnswer) return 'green';
