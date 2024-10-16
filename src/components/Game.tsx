@@ -1,4 +1,5 @@
 import {
+  Button,
   Card,
   IconButton,
   List,
@@ -87,6 +88,7 @@ export function Game() {
   const previousQuestions = useQuestionStore(
     (state) => state.goPreviousQuestion
   );
+  const resetGame = useQuestionStore((state) => state.resetGame);
 
   const questionInfo = questions[currentQuestions];
 
@@ -121,6 +123,14 @@ export function Game() {
       </Stack>
 
       <Footer />
+
+      <Button
+        onClick={resetGame}
+        variant="contained"
+        sx={{ marginTop: '16px' }}
+      >
+        Reset Game
+      </Button>
     </>
   );
 }

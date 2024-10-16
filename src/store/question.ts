@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { type Question } from '../types';
+import { persist } from 'zustand/middleware';
 
 interface State {
   questions: Question[];
@@ -8,76 +9,88 @@ interface State {
   selectAnswer: (questionInd: number, answerInd: number) => void;
   goNextQuestion: () => void;
   goPreviousQuestion: () => void;
+  resetGame: () => void;
 }
 
-export const useQuestionStore = create<State>((set, get) => ({
-  questions: [],
-  currentQuestion: 0,
+export const useQuestionStore = create<State>()(
+  persist(
+    (set, get) => ({
+      questions: [],
+      currentQuestion: 0,
 
-  fetchQuestion: async (limit) => {
-    // Fetching from public data.
-    const response = await fetch('http://localhost:5173/data.json');
+      fetchQuestion: async (limit) => {
+        // Fetching from public data.
+        const response = await fetch('http://localhost:5173/data.json');
 
-    if (!response.ok)
-      throw new Error('Couldnt load quiz questions, try again.');
+        if (!response.ok)
+          throw new Error('Couldnt load quiz questions, try again.');
 
-    const data = await response.json();
+        const data = await response.json();
 
-    // From 50 question im keeping randomly up to the limit variable.
-    const questions = data
-      .map((q: Question) => ({ q, rand: Math.random() }))
-      .sort(
-        (
-          { rand: aRand }: { q: Question; rand: number },
-          { rand: bRand }: { q: Question; rand: number }
-        ) => aRand - bRand
-      )
-      .map(({ q }: { q: Question; rand: number }) => q)
-      .slice(0, limit);
+        // From 50 question im keeping randomly up to the limit variable.
+        const questions = data
+          .map((q: Question) => ({ q, rand: Math.random() }))
+          .sort(
+            (
+              { rand: aRand }: { q: Question; rand: number },
+              { rand: bRand }: { q: Question; rand: number }
+            ) => aRand - bRand
+          )
+          .map(({ q }: { q: Question; rand: number }) => q)
+          .slice(0, limit);
 
-    set({ questions });
-  },
+        set({ questions });
+      },
 
-  selectAnswer: (questionInd, answerInd) => {
-    // Retrieving state, to get all questions.
-    const { questions } = get();
-    // Using structuredClone to clone all questions.
-    const newQuestions = structuredClone(questions);
+      selectAnswer: (questionInd, answerInd) => {
+        // Retrieving state, to get all questions.
+        const { questions } = get();
+        // Using structuredClone to clone all questions.
+        const newQuestions = structuredClone(questions);
 
-    // Finding the question index that the answer was selected from.
-    const questionIndex = newQuestions.findIndex((q) => q.id === questionInd);
+        // Finding the question index that the answer was selected from.
+        const questionIndex = newQuestions.findIndex(
+          (q) => q.id === questionInd
+        );
 
-    // Im retrieving the index of the question (and not the id), because it will be
-    // easier to update the question based on the array index, than the id from the question.
-    const questionInfo = newQuestions[questionIndex];
+        // Im retrieving the index of the question (and not the id), because it will be
+        // easier to update the question based on the array index, than the id from the question.
+        const questionInfo = newQuestions[questionIndex];
 
-    // Checking if its the correct answer.
-    const isCorrectUserAnswer = questionInfo.correctAnswer === answerInd;
+        // Checking if its the correct answer.
+        const isCorrectUserAnswer = questionInfo.correctAnswer === answerInd;
 
-    // Updating the state, adding the properties for selected answer by user.
-    newQuestions[questionIndex] = {
-      ...questionInfo,
-      userSelectedAnswer: answerInd,
-      isCorrectUserAnswer,
-    };
+        // Updating the state, adding the properties for selected answer by user.
+        newQuestions[questionIndex] = {
+          ...questionInfo,
+          userSelectedAnswer: answerInd,
+          isCorrectUserAnswer,
+        };
 
-    set({ questions: newQuestions });
-  },
+        set({ questions: newQuestions });
+      },
 
-  goNextQuestion: () => {
-    const { currentQuestion, questions } = get();
-    const nextQuestion = currentQuestion + 1;
+      goNextQuestion: () => {
+        const { currentQuestion, questions } = get();
+        const nextQuestion = currentQuestion + 1;
 
-    if (nextQuestion <= questions.length) {
-      set({ currentQuestion: nextQuestion });
-    }
-  },
+        if (nextQuestion <= questions.length) {
+          set({ currentQuestion: nextQuestion });
+        }
+      },
 
-  goPreviousQuestion: () => {
-    const { currentQuestion } = get();
-    const previousQuestion = currentQuestion - 1;
-    if (previousQuestion >= 0) {
-      set({ currentQuestion: previousQuestion });
-    }
-  },
-}));
+      goPreviousQuestion: () => {
+        const { currentQuestion } = get();
+        const previousQuestion = currentQuestion - 1;
+        if (previousQuestion >= 0) {
+          set({ currentQuestion: previousQuestion });
+        }
+      },
+
+      resetGame: () => {
+        set({ currentQuestion: 0, questions: [] });
+      },
+    }),
+    { name: 'questions' }
+  )
+);
