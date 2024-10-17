@@ -1,5 +1,9 @@
 # JavaScript Quiz
 
+<div align='center' display='flex' flex-direction='row' width='70%'>
+<img src='./public/show_gif.gif'>
+</div>
+
 This JavaScript Quiz App is built with **React**, **TypeScript**, **Zustand**, and **Material-UI**. The app provides a quiz with JavaScript-related questions, featuring code snippets for users to review and select the correct answer.
 
 ## Features
